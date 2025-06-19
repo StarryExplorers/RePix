@@ -1,37 +1,51 @@
-const CACHE_NAME = 'repix-cache-v1';
-const urlsToCache = [
-  './',
-  './index.html',
-  './manifest.json',
-  './icon-192.png',
-  './icon-512.png'
+const CACHE_NAME = 'spark-numlin-v1';
+const FILES_TO_CACHE = [
+  '/',
+  '/index.html',
+  '/manifest.json',
+  '/what-is-numlin.html',
+  '/service-worker.js',
 ];
 
-// Install SW
+// Cache essential files during install
 self.addEventListener('install', event => {
+  console.log('[SW] Installing and caching');
   event.waitUntil(
-    caches.open(CACHE_NAME).then(cache => cache.addAll(urlsToCache))
+    caches.open(CACHE_NAME).then(cache => cache.addAll(FILES_TO_CACHE))
   );
+  self.skipWaiting();
 });
 
-// Activate SW
+// Remove old cache during activation
 self.addEventListener('activate', event => {
+  console.log('[SW] Activating');
   event.waitUntil(
-    caches.keys().then(keyList =>
+    caches.keys().then(keys =>
       Promise.all(
-        keyList.map(key => {
-          if (key !== CACHE_NAME) return caches.delete(key);
+        keys.map(key => {
+          if (key !== CACHE_NAME) {
+            console.log(`[SW] Deleting old cache: ${key}`);
+            return caches.delete(key);
+          }
         })
       )
     )
   );
+  self.clients.claim();
 });
 
-// Fetch cache
+// Fetch from cache, fall back to network
 self.addEventListener('fetch', event => {
   event.respondWith(
-    caches.match(event.request).then(response =>
-      response || fetch(event.request)
-    )
+    caches.match(event.request).then(cachedResp => {
+      return cachedResp || fetch(event.request);
+    })
   );
+});
+
+// Skip waiting if told to
+self.addEventListener('message', event => {
+  if (event.data && event.data.action === 'SKIP_WAITING') {
+    self.skipWaiting();
+  }
 });
