@@ -1,10 +1,12 @@
-const CACHE_NAME = 'spark-numlin-v1';
+const CACHE_NAME = 'repix-cache-v1';
 const FILES_TO_CACHE = [
   '/',
   '/index.html',
   '/manifest.json',
-  '/what-is-numlin.html',
   '/service-worker.js',
+  '/icon-192.png',
+  '/icon-512.png',
+  'https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap'
 ];
 
 // Cache essential files during install
