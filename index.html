@@ -1,19 +1,13 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js')
-      .then(() => console.log("✅ SparkLogin service worker registered"))
-      .catch(err => console.error("❌ Service Worker error", err));
-  }
-  </script>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>RePix - Image Resizer</title>
   <link rel="manifest" href="manifest.json">
   <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Segoe+UI&display=swap">
   <meta name="theme-color" content="#e8f0ff">
+  <link rel="apple-touch-icon" href="icon-192.png">
 
   <!-- 🔐 LOGIN CHECK SCRIPT -->
   <script>
@@ -157,31 +151,30 @@
     }
   </script>
 
-  <!-- PWA service worker -->
+  <!-- PWA service worker with update handling -->
   <script>
-  if ('serviceWorker' in navigator) {
-    navigator.serviceWorker.register('service-worker.js').then(reg => {
-      reg.onupdatefound = () => {
-        const newWorker = reg.installing;
-        newWorker.onstatechange = () => {
-          if (newWorker.state === 'installed') {
-            if (navigator.serviceWorker.controller) {
-              const update = confirm("🔄 A new version is available. Do you want to update?");
-              if (update) {
-                newWorker.postMessage({ action: 'SKIP_WAITING' });
-                window.location.reload();
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('service-worker.js').then(reg => {
+        reg.onupdatefound = () => {
+          const newWorker = reg.installing;
+          newWorker.onstatechange = () => {
+            if (newWorker.state === 'installed') {
+              if (navigator.serviceWorker.controller) {
+                const update = confirm("🔄 A new version is available. Do you want to update?");
+                if (update) {
+                  newWorker.postMessage({ action: 'SKIP_WAITING' });
+                  window.location.reload();
+                }
               }
             }
-          }
+          };
         };
-      };
-    });
+      });
 
-    // Listen to the message to skip waiting
-    navigator.serviceWorker.addEventListener('controllerchange', () => {
-      console.log("🔥 Controller changed — app updated");
-    });
-  }
+      navigator.serviceWorker.addEventListener('controllerchange', () => {
+        console.log("🔥 Controller changed — app updated");
+      });
+    }
   </script>
 </body>
 </html>
